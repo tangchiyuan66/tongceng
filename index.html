@@ -1,0 +1,793 @@
+<head><script type="module">const t={cognition:'passenger',time:'23:47',station:'长乐路',scene:'长乐路 · B2 站台',hp:100,san:80,violations:0,locked:!1,ticket:!1,itLocation:'站务室',members:[],items:[],rules:[],doubts:[],log:[],engine:null};const e={passenger:'你只能读到朱砂色的字。靛青的部分在你眼里是空白的。',crew:'你只能读到靛青色的字。朱砂的部分在你眼里是空白的。',switcher:'两种颜色都看得见。你开始意识到，有些话一直还有下半句。'},n={passenger:'乘客',crew:'乘务',switcher:'换乘者'},a={carry:'随身',key:'关键',consume:'消耗',clue:'线索'};function s(e){const n=t.cognition;return'switcher'===n||(!e||'ink'===e||'mixed'===e||('passenger'===n?'indigo'!==e:'crew'!==n||'cinnabar'!==e))}function i(t){return null==t?'':String(t).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll('\'','&#39;')}function $(t){const e=document.getElementById(t);if(!e)throw new Error(`[vault] 找不到元素 #${t}`);return e}function o(t){return document.getElementById(t)}function r(t,e=document){return Array.from(e.querySelectorAll(t))}let c='all';let l=null;function d(){r('#ink-legend .ink-item').forEach(t=>{const e=!s(t.dataset.ink);t.classList.toggle('is-hidden',e);const n=t.querySelector('[data-veil]');n&&(n.textContent=e?'不可见':'')})}function u(){const e=$('rule-list'),n=l??o('rule-empty');if(!n)return;l=n,$('rcnt-all').textContent=String(t.rules.length);const a={};t.rules.forEach(t=>{const e=t.source||'未分类';a[e]=(a[e]??0)+1}),r('#rule-filters .chip').forEach(e=>{const n=e.dataset.ruleFilter??'all',s=e.querySelector('b');s&&(s.textContent=String('all'===n?t.rules.length:a[n]??0),e.classList.toggle('is-on',n===c))});const d=t.rules.filter(t=>'all'===c||t.source===c);if(!d.length)return e.innerHTML='',e.appendChild(n),void(n.hidden=!1);n.hidden=!0;const u={},m=[];d.forEach(t=>{const e=t.source||'未分类';u[e]||(u[e]=[],m.push(e)),u[e].push(t)}),e.innerHTML=m.map(e=>{const n=u[e].map(e=>{let n=s(e.ink);const a='mixed'!==(o=e).ink?o.text??'':'passenger'===t.cognition?o.textPassenger??'':'crew'===t.cognition?o.textCrew??'':o.text??(o.textPassenger??'')+(o.textCrew??'');var o;return a||(n=!1),'<div class="rule ink-'+i(e.ink||'ink')+(n?'':' is-veiled')+'"><span class="rule-no">'+(null!=e.no?String(e.no).padStart(2,'0'):'—')+'</span><span class="rule-text">'+i(a||'这一行在你眼里是一片被水泡开的空白。')+'</span>'+(n?'':'<span class="rule-veil-note">不可见</span>')+'</div>'}).join('');return'<section class="rule-group"><div class="rule-group-head"><h3>'+i(e)+'</h3><span></span><em>'+u[e].length+' 条</em></div>'+n+'</section>'}).join('')}let m=null;let g=null;function p(){$('cog-hint').textContent=e[t.cognition],$('rule-foot-cog').textContent='当前：'+n[t.cognition]}let f=null;function h(a){if(!e[a])return;t.cognition=a;const s=document.getElementById('vault');s&&s.setAttribute('data-cognition',a),r('.cog-btn').forEach(t=>{const e=t.dataset.cog===a;t.classList.toggle('is-on',e),t.setAttribute('aria-pressed',e?'true':'false')}),r('#seg-demo button').forEach(t=>{t.classList.toggle('is-on',t.dataset.cogSet===a)}),p(),function(){const e=o('rule-foot-cog');e&&(e.textContent='当前：'+n[t.cognition])}(),d(),u()}function v(t){const e=document.getElementById(t);if(!e)return;f&&y(),f=t,e.classList.add('is-open');const n=e.querySelector('.modal-close');n?.focus()}function y(){f&&(document.getElementById(f)?.classList.remove('is-open'),f=null)}function b(e){const n=$('feed-inner'),a=(s='feed-void',document.getElementById(s));var s;a&&a.remove();const o=document.createElement('article');o.className='msg';const r='system'===e.tone?'系统':'叙事';o.innerHTML='<div class="msg-head"><span class="msg-tag">'+r+'</span><span class="msg-meta">'+i(t.time)+' · '+i(t.scene)+'</span></div><div class="msg-body"></div>';const c=o.querySelector('.msg-body');(e.paragraphs??[]).forEach(t=>{const e=document.createElement('p');e.textContent=t,c.appendChild(e)}),n.appendChild(o);const l=$('narrative-feed');l.scrollTop=l.scrollHeight,e.choices&&e.choices.length&&k(e.choices)}function k(t){for(let e=0;e<4;e++){const n=$('choice-'+(e+1)),a=t[e]||'';n.disabled=!a;const s=n.querySelector('.choice-text');s&&(s.textContent=a||'——'),n.dataset.choiceText=a}$('choices-meta').textContent=t.length?'四项 · 不标注对错':'叙事生成后填入四项'}function S(t,e){r('.choice').forEach(e=>{e.disabled=t||!e.dataset.choiceText});const n=document.getElementById('composer-hint');n&&(n.innerHTML=t?'<span class="state-dot"><i></i>'+i(e||'剧情正在生成…')+'</span>':'<span class="state-dot"><i></i>叙事引擎已接入</span>')}let x='all',w=null;function M(){const e=$('item-grid'),n=$('item-empty'),s=t.items.filter(t=>'all'===x||t.kind===x);s.length&&!s.some(t=>t.id===w)&&(w=s[0].id),s.length||(w=null);const o={all:t.items.length,carry:0,key:0,consume:0,clue:0};t.items.forEach(t=>{t.kind&&void 0!==o[t.kind]&&o[t.kind]++}),$('cnt-all').textContent=String(o.all),$('cnt-carry').textContent=String(o.carry),$('cnt-key').textContent=String(o.key),$('cnt-consume').textContent=String(o.consume),$('cnt-clue').textContent=String(o.clue),r('#item-filters .chip').forEach(t=>{t.classList.toggle('is-on',t.dataset.itemFilter===x)}),s.length?(n.hidden=!0,e.hidden=!1,e.innerHTML=s.map(t=>'<button class="item-card'+(t.id===w?' is-on':'')+'" type="button" data-item="'+i(t.id)+'"><span class="item-top"><svg class="item-glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 8.5 12 13l8-4.5" stroke="currentColor" stroke-width="1" stroke-linejoin="round" opacity=".6"/></svg><span class="item-count">×'+(t.qty||1)+'</span></span><span class="item-name">'+i(t.name||'未命名')+'</span><span class="item-kind">'+i(t.kind&&a[t.kind]||'未分类')+'</span></button>').join('')):(e.hidden=!0,e.innerHTML='',n.hidden=!1),function(){const e=$('item-detail');let n;for(const e of t.items)if(e.id===w){n=e;break}if(!n)return void(e.innerHTML='<div class="empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 4"/></svg><p class="empty-title">未选中物件。</p><p class="empty-sub">选中一件物品，<br>来源、状态与用途会显示在这里。</p></div>');e.innerHTML='<div class="dossier"><div class="dossier-top"><div class="dossier-portrait"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 8.5 12 13l8-4.5M12 13v7" stroke="currentColor" stroke-width="1" stroke-linejoin="round" opacity=".6"/></svg></div><div><p class="dossier-name">'+i(n.name||'未命名')+'</p><div class="dossier-tags"><span class="tag accent">'+i(n.kind&&a[n.kind]||'未分类')+'</span><span class="tag">×'+(n.qty||1)+'</span></div></div></div><div class="field-grid">'+C('类别',n.kind&&a[n.kind]||'未分类')+C('来源',n.origin)+C('状态',n.status)+'</div><div class="note-block"><h4>描述</h4><p>'+i(n.desc||'还没有细看。')+'</p></div><div class="note-block"><h4>用途</h4><p>'+i(n.use||'暂时看不出用途。')+'</p></div></div>'}()}function C(t,e){const n=null==e?'':String(e);return'<div class="field"><dt>'+t+'</dt><dd class="'+(n?'':'is-blank')+'">'+(n?i(n):'未记录')+'</dd></div>'}let E=null;function L(t,e){const n=null==e?'':String(e);return'<div class="field"><dt>'+t+'</dt><dd class="'+(n?'':'is-blank')+'">'+(n?i(n):'未记录')+'</dd></div>'}function A(){const e=$('member-list'),n=$('member-detail'),a=$('member-list-empty');t.members.length&&!t.members.some(t=>t.id===E)&&(E=t.members[0].id),t.members.length||(E=null),e.querySelectorAll('.member-item').forEach(t=>t.remove()),a&&(a.hidden=t.members.length>0),t.members.forEach(t=>{const n=document.createElement('button');var a;n.type='button',n.className='member-item'+(t.id===E?' is-on':''),n.setAttribute('data-member',t.id),n.innerHTML='<span class="avatar"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="7.2" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M4 17c.6-3.2 3-5 6-5s5.4 1.8 6 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span class="member-id"><strong></strong><span></span></span><span class="status-pip '+(('异常'===(a=t.status)||'已离地'===a?'bad':'正常'===a?'ok':'')+'"></span>'),n.querySelector('strong').textContent=t.name||'未记名',n.querySelector('.member-id span:last-child').textContent=(t.role||'身份未明')+' · '+(t.armband||'臂章未记'),e.appendChild(n)}),function(e){let n;for(const e of t.members)if(e.id===E){n=e;break}if(!n)return void(e.innerHTML='<div class="empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M8 8h8M8 12h8M8 16h4.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"/></svg><p class="empty-title">'+(t.members.length?'未选中成员。':'左侧还没有名单。')+'</p><p class="empty-sub">选中一名成员，<br>姓名、性别、身份与它会显示在这里。</p></div>');e.innerHTML='<div class="dossier"><div class="dossier-top"><div class="dossier-portrait"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.6" r="3.6" stroke="currentColor" stroke-width="1.2"/><path d="M4.6 20c.7-3.8 3.6-6 7.4-6s6.7 2.2 7.4 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div><p class="dossier-name">'+i(n.name||'未记名')+'</p><div class="dossier-tags"><span class="tag accent">'+i(n.status||'未知状态')+'</span><span class="tag">'+i(n.faction||'阵营未明')+'</span><span class="tag">'+i(n.attitude||'未接触')+'</span></div></div></div><div class="field-grid">'+L('姓名',n.name)+L('性别',n.gender)+L('身份',n.role)+L('所属',n.faction)+L('臂章颜色',n.armband)+L('当前状态',n.status)+L('态度',n.attitude)+L('首次接触',n.firstSeen)+L('最后出现',n.lastSeen)+L('随身特征',n.trait)+'</div><div class="note-block"><h4>备注</h4><p>'+i(n.note||'还没有值得写下来的东西。')+'</p></div></div>'}(n)}let I=!1;const H={cold:'叙述要冷，像站台监控的旁白；不解释，不抒情，只给能被看见的东西。',warm:'叙述要有体温，留意人物的呼吸、手心和没说出口的半句话；但危险不必因此变轻。',chaos:'叙述交给广播与噪声：句子可以被切碎，顺序可以错位；认知本身正在被改写。'};const B=/<thinking>[\s\S]*?<\/thinking>/gi,T=/<thinking>/i,q=/<think>[\s\S]*?<\/redacted_reasoning>/gi,V=/<think>/i;function N(t){if(!t)return'';let e=t.replaceAll(B,'').replaceAll(q,'');const n=e.search(T);-1!==n&&(e=e.substring(0,n));const a=e.search(V);return-1!==a&&(e=e.substring(0,a)),e}function R(t,e){const n=new RegExp(`<${e}>([\\s\\S]*?)</${e}>`,'gi'),a=Array.from(t.matchAll(n));return a.length?a[a.length-1][1].trim():''}function U(t){return R(N(t),'maintext')}function j(t){const e=N(t);if(!e)return[];const n=[],a=/<option id="([^"]+)">([\s\S]*?)<\/option>/gi;for(const t of e.matchAll(a))n.push({id:t[1],text:t[2].trim()});if(n.length)return n;const s=R(e,'option');if(!s)return[];const i=s.split('\n').map(t=>t.trim()).filter(t=>t.length>0),o=/^[A-Z][.、)]\s*/;if(!i.some(t=>o.test(t)))return i.map((t,e)=>({id:String.fromCharCode(65+e),text:t}));const r=[];let c=[];const l=()=>{if(!c.length)return;const t=c.join('\n'),e=t.match(/^([A-Z])[.、)]/)?.[1]??String.fromCharCode(65+r.length);r.push({id:e,text:t.replace(o,'').trim()}),c=[]};for(const t of i)o.test(t)?(l(),c.push(t)):c.length&&c.push(t);return l(),r}let F=!1,O=null;async function D(){if(!F)return O||(O=(async()=>{try{if('function'!=typeof waitGlobalInitialized)return void(F=!0);await waitGlobalInitialized('Mvu'),F=!0,console.info('✅ [variableReader] MVU 初始化完成')}catch(t){F=!0,console.warn('⚠️ [variableReader] 等待 MVU 初始化失败，降级为直接读变量:',t)}})(),O)}function G(t){return Boolean(t)&&'object'==typeof t&&Object.keys(t).length>0}function P(t,e,n){if(!t)return n;let a=t;for(const t of e.split('.')){if(null==a)return n;Array.isArray(a)&&a.length>0&&'object'!=typeof a[0]&&(a=a[0]),a=a[t]}return Array.isArray(a)&&a.length>0?a[0]??n:a??n}async function W(t){if('undefined'==typeof Mvu)return null;try{const e=Mvu.getMvuData({type:'message',message_id:t});if(e&&G(e.stat_data))return{stat_data:e.stat_data,display_data:e.display_data}}catch(e){console.warn(`⚠️ [variableReader] Mvu.getMvuData(${t}) 失败:`,e)}return null}function K(t){if('function'!=typeof getVariables)return null;try{const e=getVariables({type:'message',message_id:t});if(e&&G(e.stat_data))return{stat_data:e.stat_data,display_data:e.display_data}}catch(e){console.warn(`⚠️ [variableReader] getVariables(${t}) 失败:`,e)}return null}async function Z(){if('function'!=typeof getChatMessages||'function'!=typeof getVariables)return{stat_data:{}};await D();const t=function(){if('function'!=typeof getChatMessages)return null;try{return getChatMessages(-1,{role:'assistant'}).filter(t=>t.message_id>=0).at(-1)??null}catch(t){return console.warn('⚠️ [variableReader] 读取最新 assistant 消息失败:',t),null}}();if(t){const e=t.message_id,n=await W(e);if(n)return console.info(`✅ [variableReader] 从最新 assistant 消息（${e} 楼）读到 MVU 数据`),n;if(G(t.data?.stat_data))return console.info(`✅ [variableReader] 从 ${e} 楼消息 data 字段读到变量`),{stat_data:t.data.stat_data,display_data:t.data?.display_data}}const e=await W('latest');if(e)return console.info('✅ [variableReader] 从最新楼层读到 MVU 数据'),e;const n=K('latest');if(n)return console.info('✅ [variableReader] 从最新楼层读到变量（getVariables）'),n;const a=await W(0);if(a)return console.info('✅ [variableReader] 最新楼层无数据，回落到 0 层 MVU 数据'),a;const s=K(0);return s?(console.info('✅ [variableReader] 最新楼层无数据，回落到 0 层变量'),s):(console.info('ℹ️ [variableReader] 所有来源都没有变量数据'),{stat_data:{}})}function Y(t){return Math.floor(t/2)+1}async function J(t={}){const e=t.worldbookName??'vault',n=t.entryName??'编年史';try{const{hit:t}=function(t,e){for(let n='number'==typeof e?e:getLastMessageId();n>=0;n--){const e=getChatMessages(n).at(-1);if(!e)continue;const a=R(N(e.message??''),'sum');if(a)return{worldbookName:t,hit:{message_id:n,sum:a}}}return{worldbookName:t,hit:null}}(e);if(!t)return;const a=(await getWorldbook(e)).find(t=>t.name===n);if(!a)return void console.warn(`⚠️ [chronicleUpdater] 世界书《${e}》里没有「${n}」条目，跳过`);const s=Y(t.message_id),i=function(t,e){return`[${String(t).padStart(2,'0')}] ${e}`}(s,t.sum),o=a.content??'',r=[...o.split('\n').filter(t=>{const e=t.match(/^\[(\d+)\]/);return!e||Number(e[1])<s}).filter(t=>t.trim().length>0),i].join('\n');if(r===o)return;await replaceWorldbook(e,[{uid:a.uid,content:r}],{render:'debounced'}),console.info(`✅ [chronicleUpdater] 编年史已更新到第 ${s} 条（${t.message_id} 楼）`)}catch(t){console.error('❌ [chronicleUpdater] 更新编年史失败:',t)}}async function Q(){const t=await Z();return{stat_data:t.stat_data??{},display_data:t.display_data??{},delta_data:{}}}async function X(t,e={}){let n=null,a=null;try{e.onDisableOptions?.(),e.onShowGenerating?.();const i=function(t){return'option'===t.type?`我选择：${t.content}`:t.content}(t),o=await Q();if(await createChatMessages([{role:'user',message:i,data:o}],{refresh:'none'}),n=getLastMessageId(),console.info(`📤 [requestHandler] 已创建 user 消息（${n} 楼）`),'function'==typeof eventOn&&e.onStreamingUpdate){const t=t=>{const n=function(t,e){const n=R(t,e);if(n)return n;const a=new RegExp(`<${e}>([\\s\\S]*)$`,'i'),s=t.match(a);return s?s[1].trim():''}(N(t),'maintext');n&&e.onStreamingUpdate?.(n)},n=eventOn(iframe_events.STREAM_TOKEN_RECEIVED_FULLY,t);a=()=>n.stop()}const r=await generate({user_input:i,should_stream:!0}),c='string'==typeof r?r:r.content;a?.(),a=null;const l=N(c??'');if(!(l&&(s=l,U(s).length>0)))return null!==n&&(await deleteChatMessages([n],{refresh:'none'}),console.warn('⚠️ [requestHandler] 回复不合规，已回滚 user 消息')),e.onHideGenerating?.(),e.onEnableOptions?.(),e.onError?.('生成的消息不符合规范（缺少 <maintext>）'),!1;const d=function(t){const e=N(t);return{maintext:R(e,'maintext'),options:j(e),sum:R(e,'sum'),updateVariable:R(e,'UpdateVariable'),raw:e}}(l),u=function(t){let e=`<maintext>${t.maintext}</maintext>\n\n<option>${t.options.map(t=>t.text).join('\n')}</option>`;return t.sum&&(e+=`\n\n<sum>${t.sum}</sum>`),t.updateVariable&&(e+=`\n\n<UpdateVariable>${t.updateVariable}</UpdateVariable>`),e}(d);await D();let m=await Q();try{if('undefined'!=typeof Mvu){const t=await Mvu.parseMessage(u,m);t&&(m=t)}}catch(t){console.warn('⚠️ [requestHandler] MVU 命令解析失败，沿用上一轮变量:',t)}return await createChatMessages([{role:'assistant',message:u,data:m}],{refresh:'none'}),console.info('✅ [requestHandler] 已创建 assistant 消息'),J().catch(t=>console.warn('⚠️ [requestHandler] 编年史更新失败:',t)),e.onHideGenerating?.(),await(e.onRefreshVariables?.()),setTimeout(()=>{e.onRefreshStory?.()},300),e.onEnableOptions?.(),!0}catch(t){if(console.error('❌ [requestHandler] 请求处理失败:',t),a?.(),null!==n)try{await deleteChatMessages([n],{refresh:'none'})}catch(t){console.error('❌ [requestHandler] 回滚 user 消息失败:',t)}return e.onHideGenerating?.(),e.onEnableOptions?.(),e.onError?.(t instanceof Error?t.message:String(t)),!1}var s}async function tt(){const{stat_data:e}=await Z();if(!e||0===Object.keys(e).length)return void console.info('ℹ️ [sync] 当前楼层没有变量数据，保留界面现有内容');const n=function(t){const e=(t,e,n,a)=>{const s=Number(t);return Number.isNaN(s)?a:Math.min(n,Math.max(e,s))},n=t['世界']??{},a=t['体征']??{},s=t['身份']??{};return{世界:{当前时间:P(n,'当前时间','23:47'),当前地点:P(n,'当前地点','长乐路 · B2 站台'),近期事务:n['近期事务']&&'object'==typeof n['近期事务']?n['近期事务']:{}},身份:{认知:P(s,'认知','乘客'),持票根:Boolean(P(s,'持票根',!1)),已被锁定:Boolean(P(s,'已被锁定',!1)),违规次数:e(P(s,'违规次数',0),0,99,0),它所在位置:P(s,'它所在位置','站务室')},体征:{体力:e(P(a,'体力',100),0,100,100),理智:e(P(a,'理智',80),0,100,80)},成员:Array.isArray(t['成员'])?t['成员']:[],物品:Array.isArray(t['物品'])?t['物品']:[],守则:Array.isArray(t['守则'])?t['守则']:[],疑点:Array.isArray(t['疑点'])?t['疑点']:[],日志:Array.isArray(t['日志'])?t['日志']:[]}}(e);n['世界']?.当前时间&&(t.time=String(n['世界'].当前时间)),n['世界']?.当前地点&&(t.scene=String(n['世界'].当前地点),t.station=t.scene.split('·')[0].trim()||t.station),n['身份']&&(t.cognition=n['身份'].认知??t.cognition,t.ticket=Boolean(n['身份'].持票根),t.locked=Boolean(n['身份'].已被锁定),t.violations=Number(n['身份'].违规次数??0),t.itLocation=String(n['身份'].它所在位置??t.itLocation)),n['体征']&&(t.hp=Number(n['体征'].体力??t.hp),t.san=Number(n['体征'].理智??t.san));const a=(t,e,n)=>{Array.isArray(t)&&t.length>0&&n.splice(0,n.length,...t.map(e))};a(n['成员'],et,t.members),a(n['物品'],nt,t.items),a(n['守则'],at,t.rules),a(n['疑点'],st,t.doubts),a(n['日志'],it,t.log),console.info('🔄 [sync] 变量已同步到界面状态',{时间:t.time,成员:t.members.length,物品:t.items.length,守则:t.rules.length})}function et(t,e){return{id:String(t?.id??`member-${e}`),name:String(t?.姓名??t?.name??''),gender:String(t?.性别??t?.gender??''),role:String(t?.身份??t?.role??''),faction:String(t?.所属??t?.faction??''),armband:String(t?.臂章??t?.armband??''),status:String(t?.状态??t?.status??''),attitude:String(t?.态度??t?.attitude??''),firstSeen:String(t?.首次接触??t?.firstSeen??''),lastSeen:String(t?.最后出现??t?.lastSeen??''),trait:String(t?.特征??t?.trait??''),note:String(t?.备注??t?.note??'')}}function nt(t,e){const n=String(t?.类别??t?.kind??'随身');return{id:String(t?.id??`item-${e}`),name:String(t?.名称??t?.name??''),kind:{随身:'carry',关键:'key',消耗:'consume',线索:'clue'}[n]??t?.kind??'carry',qty:Number(t?.数量??t?.qty??1),origin:String(t?.来源??t?.origin??''),status:String(t?.状态??t?.status??''),desc:String(t?.描述??t?.desc??''),use:String(t?.用途??t?.use??'')}}function at(t,e){return{id:String(t?.id??`rule-${e}`),source:String(t?.来源??t?.source??'未分类'),no:Number(t?.编号??t?.no??e+1),ink:t?.墨色??t?.ink??'ink',text:String(t?.正文??t?.text??''),textPassenger:String(t?.乘客视??t?.textPassenger??''),textCrew:String(t?.乘务视??t?.textCrew??''),at:String(t?.时间??t?.at??'')}}function st(t,e){return{id:String(t?.id??`doubt-${e}`),title:String(t?.标题??t?.title??''),content:String(t?.内容??t?.content??''),source:String(t?.来源??t?.source??''),at:String(t?.时间??t?.at??'')}}function it(t){return{time:String(t?.时间??t?.time??''),text:String(t?.内容??t?.text??'')}}function ot(){if('function'!=typeof getChatMessages||'function'!=typeof getLastMessageId)return{maintext:'',options:[]};try{const t=function(){try{const t=getLastMessageId();if(t<0)return{maintext:'',options:[]};let e=getChatMessages(t,{role:'assistant'}).at(-1);if(e||(e=getChatMessages(t).at(-1)),!e)return{maintext:'',options:[]};const n=e.message??'';let a;return e.message_id>0&&(a=getChatMessages(e.message_id-1,{role:'user'}).at(-1)?.message_id),{maintext:U(n),options:j(n),messageId:e.message_id,userMessageId:a,fullMessage:n}}catch(t){return console.error('❌ [messageParser] 加载最新消息失败:',t),{maintext:'',options:[]}}}();return{maintext:t.maintext,options:t.options.map(t=>t.text)}}catch(t){return console.warn('⚠️ [sync] 读取最新楼层正文失败:',t),{maintext:'',options:[]}}}function rt(){var a;$('hud-time').textContent=t.time,$('hud-station').textContent=t.station,$('stage-station').textContent=t.scene||t.station,function(){$('vital-hp').textContent=String(t.hp),$('vital-san').textContent=String(t.san);const e=$('fill-hp'),n=$('fill-san');e.style.width=Math.max(0,Math.min(100,t.hp))+'%',n.style.width=Math.max(0,Math.min(100,t.san))+'%';const a=(t,e)=>e<=30?'is-bad':e<=60?'is-warn':'san'===t?'is-san':'';e.className='bar-fill '+a('hp',t.hp),n.className='bar-fill is-san '+a('san',t.san),$('bar-hp').setAttribute('aria-valuenow',String(t.hp)),$('bar-san').setAttribute('aria-valuenow',String(t.san))}(),$('mark-violations').textContent=String(t.violations),$('mark-locked').textContent=t.locked?'是':'否',$('dot-locked').className='dot'+(t.locked?' bad':''),$('mark-ticket').textContent=t.ticket?'是':'否',$('dot-ticket').className='dot'+(t.ticket?' live':''),$('mark-it').textContent=t.itLocation||'未知',$('rail-doubt-count').textContent=Math.min(t.doubts.length,5)+' / 5',$('rail-rule-count').textContent=String(t.rules.length),A(),M(),d(),u(),function(){const e=$('doubt-list'),n=m??o('doubt-empty');if(n){if(m=n,!t.doubts.length)return e.innerHTML='',e.appendChild(n),void(n.hidden=!1);n.hidden=!0,e.innerHTML=t.doubts.slice(0,5).map(t=>'<article class="doubt"><h3>'+i(t.title||'未命名疑点')+'</h3><p>'+i(t.content||'')+'</p><div class="doubt-meta"><span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.6c2.4 0 4.2 1.7 4.2 4 0 2.6-2.4 3.3-3.5 4.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8.3" cy="13" r=".9" fill="currentColor"/></svg>'+i(t.source||'来源未记')+'</span><span>'+i(t.at||'')+'</span></div></article>').join('')}}(),function(){const e=$('log-list'),n=g??o('log-empty');if(n){if(g=n,!t.log.length)return e.innerHTML='',e.appendChild(n),void(n.hidden=!1);n.hidden=!0,e.innerHTML='<div class="timeline">'+t.log.map(t=>'<div class="log-item"><div class="log-time">'+i(t.time||'')+'</div><div class="log-text">'+i(t.text||'')+'</div></div>').join('')+'</div>'}}(),r('.js-count').forEach(e=>{const n=e.dataset.count;let a=0;'members'===n?a=t.members.length:'items'===n?a=t.items.length:'rules'===n?a=t.rules.length:'doubts'===n?a=Math.min(t.doubts.length,5):'log'===n&&(a=t.log.length),e.textContent=String(a)}),a=t.cognition,$('cog-hint').textContent=e[a],$('rule-foot-cog').textContent='当前：'+n[a],d(),u()}function ct(){return'function'==typeof getLastMessageId}async function lt(){try{await tt()}catch(t){console.error('❌ [vault] 同步变量失败，仅重绘界面:',t)}try{rt(),function(){const{maintext:t,options:e}=ot(),n=document.getElementById('feed-inner');if(n){if(!t)return n.querySelector('.msg')||(n.innerHTML='\n<div class="void-state" id="feed-void">\n  <svg class="void-ring" viewBox="0 0 132 132" fill="none" aria-hidden="true">\n    <g class="spin">\n      <circle cx="66" cy="66" r="52" stroke="currentColor" stroke-width="1" stroke-dasharray="3 7" opacity=".45"/>\n      <circle cx="66" cy="66" r="40" stroke="currentColor" stroke-width=".8" stroke-dasharray="120 12 26 10" opacity=".7"/>\n      <circle cx="66" cy="14" r="2.2" fill="currentColor"/>\n      <circle cx="66" cy="118" r="1.6" fill="currentColor" opacity=".6"/>\n    </g>\n    <circle cx="66" cy="66" r="5.4" stroke="currentColor" stroke-width="1" opacity=".8"/>\n    <circle cx="66" cy="66" r="1.6" fill="currentColor"/>\n  </svg>\n  <h3 class="void-title">叙事尚未开始。<br><b>站台的广播还在等你抬头。</b></h3>\n  <p class="void-sub">下面的输入框会把你的动作交给叙事引擎。<br>正文、疑点与四项选项将随剧情填入此页。</p>\n  <div class="void-hr"></div>\n  <p class="void-sub" style="opacity:.72">连接酒馆后由模型续写 · 离线时只做界面预演</p>\n</div>'),void(e.length&&k(e));n.innerHTML='',b({tone:'narration',paragraphs:t.split(/\n{2,}/).filter(Boolean)}),e.length&&k(e)}}()}catch(t){console.error('❌ [vault] 渲染失败:',t)}}async function dt(){if(function(){const e=document.getElementById('vault');e?.setAttribute('data-cognition',t.cognition),p(),$('rule-foot-cog').textContent='当前：'+n[t.cognition]}(),function(t){r('.cog-btn').forEach(t=>{t.addEventListener('click',()=>h(t.dataset.cog))}),r('#seg-demo button').forEach(t=>{t.addEventListener('click',()=>h(t.dataset.cogSet))}),r('[data-modal]').forEach(t=>{t.addEventListener('click',()=>v(t.dataset.modal))}),r('[data-close]').forEach(t=>t.addEventListener('click',y)),r('.modal-layer').forEach(t=>{t.addEventListener('mousedown',e=>{e.target===t&&y()})}),document.addEventListener('keydown',t=>{'Escape'===t.key&&y()}),$('member-list').addEventListener('click',e=>{const n=e.target.closest('[data-member]');n?.dataset.member&&t.onSelectMember(n.dataset.member)}),$('item-filters').addEventListener('click',e=>{const n=e.target.closest('[data-item-filter]');n?.dataset.itemFilter&&t.onItemFilter(n.dataset.itemFilter)}),$('item-grid').addEventListener('click',e=>{const n=e.target.closest('[data-item]');n?.dataset.item&&t.onSelectItem(n.dataset.item)}),$('rule-filters').addEventListener('click',e=>{const n=e.target.closest('[data-rule-filter]');n?.dataset.ruleFilter&&t.onRuleFilter(n.dataset.ruleFilter)}),$('choice-grid').addEventListener('click',e=>{const n=e.target.closest('.choice');n&&!n.disabled&&t.onSubmitAction(n.dataset.choiceText??'')});const e=$('composer-form'),n=$('composer-input');e.addEventListener('submit',e=>{e.preventDefault();const a=n.value.trim();a?(n.value='',n.style.height='auto',t.onSubmitAction(a)):n.focus()}),n.addEventListener('keydown',t=>{'Enter'!==t.key||t.shiftKey||(t.preventDefault(),e.requestSubmit?e.requestSubmit():e.dispatchEvent(new Event('submit',{cancelable:!0})))}),n.addEventListener('input',()=>{n.style.height='auto',n.style.height=Math.min(n.scrollHeight,110)+'px'});const a=$('seg-fontsize');a.addEventListener('click',e=>{const n=e.target.closest('[data-size]');n?.dataset.size&&(a.querySelectorAll('button').forEach(t=>t.classList.remove('is-on')),n.classList.add('is-on'),t.onFontSize(n.dataset.size))});const s=$('seg-motion');s.addEventListener('click',e=>{const n=e.target.closest('[data-motion]');n?.dataset.motion&&(s.querySelectorAll('button').forEach(t=>t.classList.remove('is-on')),n.classList.add('is-on'),t.onMotion('lite'===n.dataset.motion))})}({onSubmitAction:e=>{!async function(e){const n=e.trim();if(!n)return;if(t.engine)return void await t.engine(n);if(!ct())return void b({tone:'system',paragraphs:[`你：${n}`,'这个界面还没有接上酒馆——正文、疑点与选项需要由模型生成后写入变量。']});b({tone:'system',paragraphs:[`你：${n}`]}),await X({type:'custom',content:n},{onShowGenerating:()=>S(!0,'剧情正在生成…'),onHideGenerating:()=>S(!1),onStreamingUpdate:t=>{const e=document.querySelector('#feed-inner .msg:last-child .msg-body');e&&(e.innerHTML='',t.split(/\n{2,}/).filter(Boolean).forEach(t=>{const n=document.createElement('p');n.textContent=t,e.appendChild(n)}))},onRefreshStory:()=>lt(),onError:t=>{b({tone:'system',paragraphs:[`生成失败：${t}`]})}})&&await lt()}(e)},onFontSize:t=>function(t){document.documentElement.style.setProperty('--feed-font',{s:'14.5px',m:'15.5px',l:'17px'}[t])}(t),onMotion:t=>function(t){document.documentElement.classList.toggle('motion-lite',t),document.getElementById('vault')?.classList.toggle('motion-lite',t)}(t),onItemFilter:t=>function(t){x=t,M()}(t),onSelectItem:t=>function(t){w=t,M()}(t),onSelectMember:t=>function(t){E=t,A()}(t),onRuleFilter:t=>function(t){c=t,u()}(t)}),rt(),k([]),!ct())return void console.warn('⚠️ [vault] 未检测到酒馆助手接口，进入离线预演模式');if(await D(),await lt(),0===getLastMessageId()){const t={identity:'passenger',name:'你',carried:'一张折皱的车票',style:'cold'};await async function(t){try{return await updateVariablesWith(e=>{const n=e??{};n.stat_data||(n.stat_data={});const a=n.stat_data;return a['世界']=a['世界']??{},a['身份']=a['身份']??{},a['体征']=a['体征']??{},a['世界']['当前时间']='23:47',a['世界']['当前地点']='长乐路 · B2 站台',a['世界']['近期事务']=a['世界']['近期事务']??{},a['身份']['认知']=t.identity,a['身份']['姓名']=t.name,a['身份']['持票根']=!1,a['身份']['已被锁定']=!1,a['身份']['违规次数']=0,a['身份']['它所在位置']='站务室',a['体征']['体力']=100,a['体征']['理智']=80,a['成员']=a['成员']??[],a['物品']=a['物品']??[],a['守则']=a['守则']??[],a['疑点']=a['疑点']??[],a['日志']=a['日志']??[],t.carried&&a['物品'].push({id:'item-start',name:t.carried,kind:'carry',qty:1,origin:'你上车时就在身上',status:'完好',desc:'你说不清它为什么在你口袋里，但它确实在。',use:'暂时看不出用途。'}),n},{type:'message',message_id:0}),console.info('✅ [gameInitializer] 0 层变量已初始化'),!0}catch(t){return console.error('❌ [gameInitializer] 初始化 0 层变量失败:',t),!1}}(t),await async function(t){if(I)return console.info('⚠️ [gameInitializer] 正在创建开局楼层，跳过重复调用'),!1;try{if(getChatMessages(1).length>0)return console.info('⚠️ [gameInitializer] 1 层已存在，跳过创建'),!0;I=!0;const e=`<maintext>\n23:47，长乐路站的广播换了第三次女声。你从 B2 站台的折叠椅上醒过来，膝盖上压着一张被撕掉一半的环线图。\n\n末班车应该已经走了。可站台尽头的隧道里，还亮着两盏不该亮的车头灯。\n\n你的名字是${t.name||'你'}。你身上还带着${t.carried||'一张折皱的车票'}。\n${H[t.style]}\n</maintext>`,n='<option>\n走向隧道口那两盏灯\n向站务室的方向走，去找人\n先低头把环线图看清楚\n留在原地，等广播下一次响起\n</option>',a=`${e}\n\n<sum>${t.name||'你'}在长乐路站 B2 站台醒来，末班车已走，隧道里却亮着车灯。</sum>\n\n${n}`;let s={stat_data:{}};try{const t=Mvu.getMvuData({type:'message',message_id:0});t?.stat_data&&(s={...t})}catch(t){console.warn('⚠️ [gameInitializer] 读 0 层 MVU 数据失败，改用 getVariables:',t);try{const t=getVariables({type:'message',message_id:0});s={stat_data:t?.stat_data??{},display_data:t?.display_data??{},delta_data:t?.delta_data??{}}}catch(t){console.warn('⚠️ [gameInitializer] 0 层变量不可读，用空结构占位:',t)}}return await createChatMessages([{role:'assistant',message:a,data:s}],{refresh:'none'}),console.info('✅ [gameInitializer] 已创建开局楼层（1 层）'),!0}catch(t){return console.error('❌ [gameInitializer] 创建开局楼层失败:',t),!1}finally{I=!1}}(t),await lt()}let e=null;const a=t=>{null!==e&&window.clearTimeout(e),e=window.setTimeout(()=>{e=null,lt()},t)};eventOn(tavern_events.MESSAGE_UPDATED,()=>a(300)),eventOn(tavern_events.MESSAGE_RECEIVED,()=>a(1e3)),eventOn(tavern_events.CHAT_CHANGED,()=>window.location.reload())}var ut;ut=()=>{dt().catch(t=>console.error('❌ [vault] 启动失败:',t))},'loading'===document.readyState?document.addEventListener('DOMContentLoaded',ut,{once:!0}):ut(),window.VaultUI={state:t,pushSegment:t=>b(t),setChoices:t=>k(t),setCognition:t=>h(t),openModal:t=>v(t),closeModal:()=>y(),refresh:()=>lt(),setEngine:e=>{t.engine=e}};
+//# sourceMappingURL=index.js.map</script><style>
+/* ============ 令牌：靛青深底 · 三色墨 ============ */
+:root{
+  --void:#05060a;
+  --ink-900:#090b12;
+  --ink-800:#0e111b;
+  --ink-750:#121827;
+  --ink-700:#182034;
+  --ink-600:#222c44;
+  --line:rgba(148,166,206,.10);
+  --line-hi:rgba(160,182,226,.20);
+  --text:#d5dae7;
+  --text-dim:#8a93a9;
+  --text-faint:#59627466;
+  --text-faint-2:#5a6377;
+  --cinnabar:#c8482f;
+  --cinnabar-lit:#e0654a;
+  --indigo-ink:#5b7fd4;
+  --indigo-lit:#7d9ce8;
+  --gold:#c9a227;
+  --gold-lit:#e2bf4e;
+  --ok:#6f8f7a;
+  --warn:#b4853a;
+  --danger:#c8482f;
+  --accent:#c8482f;
+  --accent-lit:#e0654a;
+  --accent-8:rgba(200,72,47,.08);
+  --accent-14:rgba(200,72,47,.14);
+  --accent-30:rgba(200,72,47,.30);
+  --accent-50:rgba(200,72,47,.50);
+  --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+  --sans:"Outfit","Noto Serif SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"Outfit",ui-monospace,"Cascadia Mono",monospace;
+  /* iframe 内的高度基准：酒馆 iframe 高度由内容决定，不能吃 vh，
+     改用 --stage-h 定高；随卡片宽度缩放，窄了就矮一点，宽了就高一点 */
+  --stage-h:clamp(680px,58vw,900px);
+  --r-lg:18px;
+  --r-md:12px;
+  --r-sm:8px;
+  --shadow-1:0 1px 0 rgba(255,255,255,.03) inset,0 18px 44px -24px rgba(0,0,0,.9);
+  --shadow-2:0 1px 0 rgba(255,255,255,.05) inset,0 40px 90px -40px rgba(0,0,0,.95);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+body[data-cognition="crew"]{
+  --accent:#5b7fd4;--accent-lit:#7d9ce8;
+  --accent-8:rgba(91,127,212,.08);--accent-14:rgba(91,127,212,.14);
+  --accent-30:rgba(91,127,212,.30);--accent-50:rgba(91,127,212,.50);
+}
+body[data-cognition="switcher"]{
+  --accent:#c9a227;--accent-lit:#e2bf4e;
+  --accent-8:rgba(201,162,39,.08);--accent-14:rgba(201,162,39,.14);
+  --accent-30:rgba(201,162,39,.30);--accent-50:rgba(201,162,39,.50);
+}
+
+/* ============ 基底 ============ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--void);color:var(--text);
+  font-family:var(--serif);font-size:15px;line-height:1.75;
+  letter-spacing:.01em;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ============ 基底 ============ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--void);color:var(--text);
+  font-family:var(--serif);font-size:15px;line-height:1.75;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+/* 定位锚点：大气层与模态层都以它为准，而不是宿主视口 */
+#vault{
+  position:relative;
+  width:100%;
+  min-height:var(--stage-h);
+  overflow:hidden;
+  isolation:isolate;
+}
+h1,h2,h3,h4,p,dl,dd,dt,figure{margin:0}
+
+[hidden]{display:none!important}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.js-count{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+textarea{font:inherit;color:inherit}
+ul,ol{margin:0;padding:0;list-style:none}
+:focus-visible{outline:1px solid var(--accent-lit);outline-offset:3px;border-radius:4px}
+::selection{background:var(--accent-30);color:#fff}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(122,140,180,.16);border-radius:9px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(140,160,205,.30);background-clip:padding-box}
+
+/* ============ 大气层 ============ */
+/* iframe 内没有视口，绝对定位锚在 #vault（position:relative）而不是 fixed */
+.atmos{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.atmos-glow{
+  position:absolute;width:120vmax;height:120vmax;left:50%;top:-58vmax;transform:translateX(-50%);
+  background:
+    radial-gradient(circle at 50% 60%, rgba(91,127,212,.13), transparent 42%),
+    radial-gradient(circle at 22% 82%, rgba(200,72,47,.10), transparent 46%);
+  animation:drift 72s linear infinite;
+  opacity:.9;
+}
+.atmos-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(148,166,206,.045) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(148,166,206,.045) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:radial-gradient(circle at 50% 40%,#000 20%,transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 50% 40%,#000 20%,transparent 78%);
+  opacity:.5;
+}
+.atmos-noise{
+  position:absolute;inset:-50%;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
+}
+.atmos-scan{
+  position:absolute;inset:0;opacity:.16;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.045) 0 1px,transparent 1px 4px);
+  mix-blend-mode:soft-light;
+}
+@keyframes drift{
+  0%{transform:translateX(-50%) rotate(0deg)}
+  100%{transform:translateX(-50%) rotate(360deg)}
+}
+
+/* ============ 顶栏 ============ */
+.topbar{
+  position:relative;z-index:4;
+  display:flex;align-items:center;gap:clamp(12px,2.4vw,34px);
+  padding:14px clamp(14px,2.4vw,32px);
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(10,13,21,.94),rgba(10,13,21,.62));
+  backdrop-filter:blur(22px) saturate(150%);
+  -webkit-backdrop-filter:blur(22px) saturate(150%);
+}
+.topbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-50),transparent);
+  opacity:.7;
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-mark{width:34px;height:34px;flex:0 0 auto;color:var(--accent-lit);filter:drop-shadow(0 0 10px var(--accent-30));transition:color .5s var(--ease)}
+.brand-title{
+  font-family:var(--serif);font-size:16.5px;font-weight:700;letter-spacing:.14em;
+  color:#eef1f8;white-space:nowrap;line-height:1.2;
+}
+.brand-text{min-width:0;overflow:hidden}
+.brand-sep{color:var(--accent);margin:0 .12em}
+.brand-sub{
+  font-family:var(--sans);font-size:10.5px;letter-spacing:.24em;color:var(--text-faint-2);
+  text-transform:uppercase;margin-top:3px;white-space:nowrap;
+}
+.navbar{display:flex;align-items:center;gap:2px;margin-left:auto;flex-wrap:nowrap;overflow:hidden}
+.navbtn{
+  position:relative;display:flex;align-items:center;gap:7px;
+  padding:9px 13px;border-radius:var(--r-sm);
+  font-family:var(--sans);font-size:12.5px;letter-spacing:.12em;color:var(--text-dim);
+  transition:color .22s var(--ease),background .22s var(--ease);
+  white-space:nowrap;
+}
+.navbtn svg{width:15px;height:15px;flex:0 0 auto;opacity:.82;transition:opacity .22s var(--ease)}
+.navbtn:hover{color:var(--text);background:rgba(255,255,255,.035)}
+.navbtn:hover svg{opacity:1}
+.navbtn.is-active{color:#fff;background:var(--accent-14)}
+.navbtn.is-active svg{opacity:1;color:var(--accent-lit)}
+.navbtn.is-active::after{
+  content:"";position:absolute;left:13px;right:13px;bottom:4px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+.navbtn::before{
+  content:"";position:absolute;left:0;top:0;width:1px;height:100%;
+  background:var(--accent);opacity:0;transform:scaleY(.2);transition:.24s var(--ease);
+}
+.navbtn:hover::before{opacity:.5;transform:scaleY(1)}
+.hud{display:flex;align-items:center;gap:14px;margin-left:4px;padding-left:16px;border-left:1px solid var(--line)}
+.hud-clock{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+.hud-time{
+  font-family:var(--mono);font-size:20px;font-weight:400;letter-spacing:.10em;
+  font-variant-numeric:tabular-nums;color:#f0f3fa;
+  text-shadow:0 0 22px rgba(120,150,220,.30);
+}
+.hud-station{font-family:var(--sans);font-size:10px;letter-spacing:.26em;color:var(--text-faint-2);margin-top:4px}
+.iconbtn{
+  display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--line);color:var(--text-dim);
+  transition:.24s var(--ease);
+}
+.iconbtn svg{width:16px;height:16px}
+.iconbtn:hover{color:#fff;border-color:var(--accent-30);background:var(--accent-8);transform:rotate(28deg)}
+
+
+/* ============ 主骨架 ============ */
+/* 高度不用 vh（酒馆 iframe 里 vh 指宿主视口），改由 --stage-h 决定整卡高度 */
+.shell{
+  position:relative;z-index:2;display:grid;
+  grid-template-columns:clamp(200px,22%,296px) minmax(0,1fr);
+  gap:clamp(12px,1.6vw,26px);
+  height:calc(var(--stage-h) - 63px);
+  padding:clamp(12px,1.5vw,24px) clamp(12px,2.2vw,32px);
+}
+
+/* ---- 侧栏 ---- */
+.rail{display:flex;flex-direction:column;gap:12px;overflow-y:auto;padding-right:4px;scrollbar-gutter:stable}
+.panel{
+  position:relative;border:1px solid var(--line);border-radius:var(--r-lg);
+  background:linear-gradient(165deg,rgba(26,32,50,.72),rgba(12,15,24,.86));
+  box-shadow:var(--shadow-1);
+  padding:15px 16px 16px;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  transition:border-color .3s var(--ease),transform .3s var(--ease);
+}
+.panel::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(150deg,rgba(255,255,255,.045),transparent 42%);
+}
+.panel:hover{border-color:var(--line-hi)}
+.panel-eyebrow{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--sans);font-size:10px;letter-spacing:.30em;color:var(--text-faint-2);
+  text-transform:uppercase;margin-bottom:12px;
+}
+.panel-eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+/* 认知切换 */
+.cog-switch{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:9px;background:rgba(0,0,0,.34);border:1px solid var(--line)}
+.cog-btn{
+  padding:8px 4px;border-radius:7px;font-family:var(--serif);font-size:12.5px;letter-spacing:.14em;
+  color:var(--text-faint-2);transition:.26s var(--ease);text-align:center;
+}
+.cog-btn:hover{color:var(--text)}
+.cog-btn.is-on{color:#fff;background:var(--accent-14);box-shadow:0 0 0 1px var(--accent-30) inset,0 6px 18px -10px var(--accent-50)}
+.cog-hint{
+  margin-top:11px;font-size:12px;line-height:1.85;color:var(--text-dim);
+  padding-left:10px;border-left:1px solid var(--accent-30);
+  transition:color .3s var(--ease);
+}
+
+/* 体征 */
+.vital{margin-bottom:13px}
+.vital:last-child{margin-bottom:0}
+.vital-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.vital-name{font-family:var(--sans);font-size:11.5px;letter-spacing:.20em;color:var(--text-dim)}
+.vital-num{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;color:var(--text)}
+.vital-num small{font-size:10px;color:var(--text-faint-2);margin-left:2px}
+.bar{position:relative;height:5px;border-radius:5px;background:rgba(0,0,0,.5);overflow:hidden;box-shadow:0 0 0 1px var(--line) inset}
+.bar-fill{
+  position:absolute;inset:0 auto 0 0;border-radius:5px;
+  background:linear-gradient(90deg,var(--ok),#93b39a);
+  transition:width .7s var(--ease),background .4s linear;
+  box-shadow:0 0 12px -2px rgba(111,143,122,.7);
+}
+.bar-fill.is-san{background:linear-gradient(90deg,#6f6d94,#9a93c0);box-shadow:0 0 12px -2px rgba(140,132,190,.7)}
+.bar-fill.is-warn{background:linear-gradient(90deg,var(--warn),#d8a35a);box-shadow:0 0 12px -2px rgba(180,133,58,.75)}
+.bar-fill.is-bad{background:linear-gradient(90deg,var(--danger),var(--cinnabar-lit));box-shadow:0 0 14px -2px rgba(200,72,47,.8)}
+
+/* 标记 */
+.marks{display:grid;gap:9px}
+.mark{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px}
+.mark dt{font-family:var(--sans);letter-spacing:.10em;color:var(--text-faint-2);font-size:11.5px}
+.mark dd{font-family:var(--sans);color:var(--text);font-size:12.5px;display:flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--text-faint-2);flex:0 0 auto;transition:.3s}
+.dot.live{background:var(--accent-lit);box-shadow:0 0 10px var(--accent-50)}
+.dot.bad{background:var(--cinnabar-lit);box-shadow:0 0 10px rgba(200,72,47,.7);animation:pulseDot 2.4s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{opacity:.55}50%{opacity:1}}
+
+.rail-link{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+  margin-top:12px;padding:9px 11px;border-radius:var(--r-sm);
+  border:1px solid var(--line);font-family:var(--sans);font-size:11.5px;letter-spacing:.14em;
+  color:var(--text-dim);transition:.24s var(--ease);
+}
+.rail-link span:last-child{color:var(--text-faint-2);font-variant-numeric:tabular-nums}
+.rail-link:hover{color:#fff;border-color:var(--accent-30);background:var(--accent-8);transform:translateX(2px)}
+
+/* ---- 主区 ---- */
+.stage{
+  position:relative;display:flex;flex-direction:column;min-height:0;
+  padding:clamp(16px,1.6vw,24px) clamp(16px,1.8vw,26px) clamp(14px,1.4vw,20px);
+  border:1px solid var(--line);border-radius:20px;
+  background:
+    radial-gradient(120% 60% at 50% -10%,rgba(52,64,100,.28),transparent 62%),
+    linear-gradient(165deg,rgba(19,24,38,.72),rgba(7,9,15,.88));
+  box-shadow:var(--shadow-1),0 1px 0 rgba(255,255,255,.03) inset;
+  overflow:hidden;
+}
+.stage::before{
+  content:"";position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-50),transparent);
+  opacity:.55;pointer-events:none;
+}
+.stage::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:
+    radial-gradient(circle at 0 0,transparent 62%,rgba(0,0,0,.42)),
+    radial-gradient(circle at 100% 100%,transparent 62%,rgba(0,0,0,.42));
+}
+.stage-corner{
+  position:absolute;width:16px;height:16px;pointer-events:none;
+  border:1px solid var(--accent-30);opacity:.6;
+}
+.stage-corner.tl{top:12px;left:12px;border-right:0;border-bottom:0;border-radius:4px 0 0 0}
+.stage-corner.tr{top:12px;right:12px;border-left:0;border-bottom:0;border-radius:0 4px 0 0}
+.stage-corner.bl{bottom:12px;left:12px;border-right:0;border-top:0;border-radius:0 0 0 4px}
+.stage-corner.br{bottom:12px;right:12px;border-left:0;border-top:0;border-radius:0 0 4px 0}
+.stage-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:0 2px 14px;border-bottom:1px solid var(--line)}
+.stage-eyebrow{
+  font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:var(--text-faint-2);
+  text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:8px;
+}
+.stage-eyebrow b{color:var(--accent-lit);font-weight:500;letter-spacing:.18em}
+.stage-title{font-size:clamp(19px,2vw,25px);font-weight:600;letter-spacing:.06em;color:#f2f5fb;line-height:1.3}
+.stage-title em{font-style:normal;color:var(--accent-lit)}
+.broadcast{display:flex;align-items:center;gap:9px;padding-bottom:3px}
+.bcast-wave{display:flex;align-items:flex-end;gap:2px;height:16px}
+.bcast-wave i{
+  display:block;width:2px;border-radius:2px;background:var(--accent);
+  opacity:.65;animation:wave 1.5s ease-in-out infinite;
+}
+.bcast-wave i:nth-child(1){height:5px;animation-delay:0s}
+.bcast-wave i:nth-child(2){height:11px;animation-delay:.14s}
+.bcast-wave i:nth-child(3){height:16px;animation-delay:.28s}
+.bcast-wave i:nth-child(4){height:8px;animation-delay:.42s}
+.bcast-wave i:nth-child(5){height:13px;animation-delay:.56s}
+.bcast-wave i:nth-child(6){height:4px;animation-delay:.7s}
+@keyframes wave{0%,100%{transform:scaleY(.36);opacity:.4}50%{transform:scaleY(1);opacity:.9}}
+.bcast-label{font-family:var(--sans);font-size:10.5px;letter-spacing:.20em;color:var(--text-faint-2);font-variant-numeric:tabular-nums}
+
+/* 叙事流 */
+.feed{
+  flex:1;min-height:0;overflow-y:auto;padding:18px 4px 8px;
+  scroll-behavior:smooth;scrollbar-gutter:stable;
+  mask-image:linear-gradient(180deg,transparent 0,#000 22px,#000 calc(100% - 14px),transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22px,#000 calc(100% - 14px),transparent 100%);
+}
+.feed-inner{display:flex;flex-direction:column;gap:22px;max-width:74ch;margin:0 auto;min-height:100%;height:100%}
+
+/* 空态 */
+.void-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  flex:1 1 auto;min-height:100%;padding:clamp(22px,4vh,54px) 0;gap:0;
+}
+/* SVG 直接子元素默认是 inline，flex 容器里 collapsed 成 0 高，必须显式 block + 定尺寸 */
+.void-ring{display:block;width:132px;height:132px;flex:0 0 auto;color:var(--accent);opacity:.55;margin-bottom:26px;filter:drop-shadow(0 0 22px var(--accent-30))}
+.void-ring .spin{transform-origin:66px 66px;animation:spin 46s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.void-title{
+  font-size:clamp(17px,2.1vw,21px);font-weight:600;letter-spacing:.14em;color:#e9edf6;line-height:1.7;
+}
+.void-title b{color:var(--accent-lit);font-weight:600}
+.void-sub{
+  margin-top:14px;font-size:13px;color:var(--text-faint-2);letter-spacing:.08em;
+  max-width:44ch;line-height:2;
+}
+.void-hr{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--line-hi),transparent);margin:24px 0 20px}
+
+/* 叙事条目 */
+.msg{position:relative;animation:riseIn .5s var(--ease) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.msg-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.msg-tag{
+  font-family:var(--sans);font-size:9.5px;letter-spacing:.28em;color:var(--accent-lit);
+  padding:3px 8px;border:1px solid var(--accent-30);border-radius:4px;background:var(--accent-8);
+}
+.msg-meta{font-family:var(--sans);font-size:10px;letter-spacing:.18em;color:var(--text-faint-2);font-variant-numeric:tabular-nums}
+.msg-body{font-size:var(--feed-font,15.5px);line-height:2.05;color:#cfd6e4;letter-spacing:.02em}
+.msg-body p+p{margin-top:1.05em}
+.msg-body em{font-style:italic;color:#b9c3d8}
+
+/* 选项 */
+.choices{padding:6px 4px 0;border-top:1px solid var(--line);margin-top:2px}
+.choices-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:11px 0 9px}
+.choices-title{font-family:var(--sans);font-size:10px;letter-spacing:.32em;color:var(--text-faint-2);text-transform:uppercase}
+.choices-meta{font-family:var(--sans);font-size:10px;letter-spacing:.14em;color:var(--text-faint-2);opacity:.7}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.choice{
+  position:relative;display:flex;align-items:center;gap:12px;text-align:left;
+  width:100%;padding:13px 15px;border-radius:var(--r-md);
+  border:1px solid var(--line);background:rgba(19,24,38,.5);
+  transition:.26s var(--ease);overflow:hidden;
+}
+.choice::after{
+  content:"";position:absolute;top:0;left:-60%;width:45%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.055),transparent);
+  transform:skewX(-18deg);transition:left .6s var(--ease);
+}
+.choice-idx{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-faint-2);
+  font-variant-numeric:tabular-nums;flex:0 0 auto;transition:.26s var(--ease);
+}
+.choice-text{font-size:13.5px;line-height:1.65;color:var(--text-dim);flex:1;letter-spacing:.03em}
+.choice-arrow{width:14px;height:14px;flex:0 0 auto;color:var(--accent-lit);opacity:0;transform:translateX(-6px);transition:.26s var(--ease)}
+.choice:not(:disabled):hover{border-color:var(--accent-30);background:rgba(26,32,50,.78);transform:translateY(-2px);box-shadow:0 14px 30px -22px #000}
+.choice:not(:disabled):hover .choice-idx{color:var(--accent-lit)}
+.choice:not(:disabled):hover .choice-arrow{opacity:1;transform:none}
+.choice:not(:disabled):hover::after{left:110%}
+.choice:disabled{cursor:default;opacity:.62}
+.choice.is-skip{
+  border-style:dashed;border-color:rgba(148,166,206,.13);
+  background:rgba(15,19,30,.42);
+}
+.choice.is-skip .choice-text{color:#6b7488;font-style:italic}
+.choice.is-skip:hover{border-color:var(--line-hi)}
+
+/* 输入区 */
+.composer{padding:12px 4px 2px}
+.composer-box{
+  display:flex;align-items:flex-end;gap:10px;padding:10px 10px 10px 16px;
+  border:1px solid var(--line);border-radius:14px;
+  background:linear-gradient(150deg,rgba(24,30,46,.72),rgba(11,14,22,.9));
+  box-shadow:var(--shadow-1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:border-color .26s var(--ease),box-shadow .26s var(--ease);
+}
+.composer-box:focus-within{border-color:var(--accent-30);box-shadow:0 0 0 1px var(--accent-14),0 20px 40px -30px #000}
+.composer-input{
+  flex:1;min-width:0;resize:none;border:0;background:none;outline:none;
+  font-family:var(--serif);font-size:14px;line-height:1.8;color:var(--text);
+  padding:5px 0;max-height:110px;
+}
+.composer-input::placeholder{color:#4d5566;letter-spacing:.06em}
+.send-btn{
+  display:flex;align-items:center;gap:7px;flex:0 0 auto;padding:9px 16px;border-radius:10px;
+  font-family:var(--sans);font-size:12px;letter-spacing:.18em;
+  color:#1a0d09;background:linear-gradient(140deg,var(--accent-lit),var(--accent));
+  box-shadow:0 8px 22px -12px var(--accent-50),0 1px 0 rgba(255,255,255,.22) inset;
+  transition:.24s var(--ease);
+}
+body[data-cognition="crew"] .send-btn{color:#060a16}
+body[data-cognition="switcher"] .send-btn{color:#1c1602}
+.send-btn svg{width:14px;height:14px}
+.send-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.send-btn:active{transform:translateY(0) scale(.985)}
+.composer-foot{
+  display:flex;justify-content:space-between;gap:12px;padding:8px 6px 0;
+  font-family:var(--sans);font-size:10px;letter-spacing:.16em;color:var(--text-faint-2);
+}
+.composer-foot .state-dot{display:inline-flex;align-items:center;gap:6px}
+.composer-foot .state-dot i{width:5px;height:5px;border-radius:50%;background:var(--warn);box-shadow:0 0 8px var(--warn)}
+
+
+/* flex 容器里的内联 SVG 一律按块级处理，避免高度被压成 0 */
+.topbar svg,.panel svg,.stage svg,.modal-layer svg{display:block}
+
+
+/* ============ 模态层 ============ */
+/* 模态层铺满整卡（#vault 为定位锚点），而不是 fixed 到宿主视口。
+   注意：不使用 opacity/visibility 过渡来"开门"——
+   酒馆 iframe 里页面可能长期处于后台标签，transition 不一定起步，
+   一旦没起步，模态就永远停在 hidden。改用类切换直接置位，动效只留在弹窗入场。 */
+.modal-layer{
+  position:absolute;inset:0;z-index:40;align-items:center;justify-content:center;
+  padding:clamp(10px,2.4vh,42px) clamp(10px,2.4vw,42px);
+  background:rgba(3,4,8,.76);
+  backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);
+  display:none;
+}
+.modal-layer.is-open{display:flex}
+.modal-shell{
+  position:relative;width:min(1120px,100%);
+  max-height:100%;height:min(760px,100%);
+  display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid var(--line-hi);border-radius:20px;
+  background:linear-gradient(168deg,rgba(24,30,47,.96),rgba(9,11,18,.99));
+  box-shadow:var(--shadow-2),0 0 0 1px rgba(255,255,255,.02) inset;
+  animation:modalIn .26s var(--ease) both;
+}
+@keyframes modalIn{
+  from{opacity:0;transform:translateY(14px) scale(.988)}
+  to{opacity:1;transform:none}
+}
+.modal-shell::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-50),transparent);
+}
+.modal-head{
+  display:flex;align-items:flex-start;gap:16px;padding:20px 22px 16px;
+  border-bottom:1px solid var(--line);flex:0 0 auto;
+}
+.modal-eyebrow{
+  font-family:var(--sans);font-size:9.5px;letter-spacing:.32em;color:var(--accent-lit);
+  text-transform:uppercase;margin-bottom:7px;
+}
+.modal-title{font-size:19px;font-weight:600;letter-spacing:.10em;color:#f0f3fa;line-height:1.3}
+.modal-desc{font-size:12px;color:var(--text-faint-2);letter-spacing:.06em;margin-top:6px;line-height:1.7}
+.modal-close{
+  margin-left:auto;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;
+  border:1px solid var(--line);color:var(--text-dim);flex:0 0 auto;transition:.24s var(--ease);
+}
+.modal-close svg{width:15px;height:15px}
+.modal-close:hover{color:#fff;border-color:var(--accent-30);background:var(--accent-8);transform:rotate(90deg)}
+.modal-body{flex:1;min-height:0;display:flex;overflow:hidden}
+.modal-foot{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:11px 22px;border-top:1px solid var(--line);
+  font-family:var(--sans);font-size:10px;letter-spacing:.18em;color:var(--text-faint-2);
+}
+.modal-foot .hint{display:flex;align-items:center;gap:8px}
+.modal-foot .hint i{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.7}
+
+/* 分栏 */
+.split{display:grid;grid-template-columns:minmax(200px,300px) minmax(0,1fr);width:100%;min-height:0}
+.split-rail{border-right:1px solid var(--line);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.16)}
+.split-main{overflow-y:auto;padding:18px 22px}
+.split-wide{display:grid;grid-template-rows:auto minmax(0,1fr);width:100%;min-height:0}
+.filter-bar{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  padding:12px 22px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.14);
+}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;
+  border:1px solid var(--line);font-family:var(--sans);font-size:11px;letter-spacing:.14em;
+  color:var(--text-dim);transition:.22s var(--ease);white-space:nowrap;
+}
+.chip svg{width:11px;height:11px}
+.chip b{font-family:var(--mono);font-weight:400;font-size:10px;color:var(--text-faint-2);font-variant-numeric:tabular-nums}
+.chip:hover{color:var(--text);border-color:var(--line-hi)}
+.chip.is-on{color:#fff;background:var(--accent-14);border-color:var(--accent-30)}
+.chip.is-on b{color:var(--accent-lit)}
+
+/* 空态（模态内） */
+.empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  height:100%;min-height:220px;padding:30px 18px;gap:0;
+}
+.empty-icon{width:44px;height:44px;color:var(--accent);opacity:.42;margin-bottom:18px}
+.empty-title{font-size:14px;letter-spacing:.12em;color:var(--text);line-height:1.9;max-width:30ch}
+.empty-sub{margin-top:10px;font-size:11.5px;letter-spacing:.08em;color:var(--text-faint-2);line-height:1.95;max-width:34ch}
+.empty-rule{width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--line-hi),transparent);margin:18px 0}
+
+/* 成员列表项 */
+.member-item{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:10px 11px;border-radius:10px;border:1px solid transparent;
+  transition:.22s var(--ease);
+}
+.member-item:hover{background:rgba(255,255,255,.035);border-color:var(--line)}
+.member-item.is-on{background:var(--accent-8);border-color:var(--accent-30)}
+.avatar{
+  position:relative;display:grid;place-items:center;width:36px;height:36px;flex:0 0 auto;
+  border-radius:9px;border:1px solid var(--line-hi);
+  background:linear-gradient(150deg,rgba(40,50,78,.9),rgba(16,20,32,.95));
+  color:var(--text-dim);
+}
+.avatar svg{width:18px;height:18px;opacity:.75}
+.member-item.is-on .avatar{border-color:var(--accent-30);color:var(--accent-lit)}
+.member-id{min-width:0;flex:1}
+.member-id strong{display:block;font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-id span{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.16em;color:var(--text-faint-2);margin-top:2px}
+.status-pip{width:6px;height:6px;border-radius:50%;flex:0 0 auto;background:var(--text-faint-2)}
+.status-pip.ok{background:var(--ok);box-shadow:0 0 8px rgba(111,143,122,.6)}
+.status-pip.warn{background:var(--warn);box-shadow:0 0 8px rgba(180,133,58,.6)}
+.status-pip.bad{background:var(--cinnabar-lit);box-shadow:0 0 8px rgba(200,72,47,.7)}
+
+/* 档案详情 */
+.dossier{display:flex;flex-direction:column;gap:20px;animation:riseIn .35s var(--ease) both}
+.dossier-top{display:flex;align-items:center;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.dossier-portrait{
+  width:74px;height:74px;flex:0 0 auto;border-radius:14px;display:grid;place-items:center;
+  border:1px solid var(--line-hi);color:var(--accent-lit);
+  background:radial-gradient(circle at 50% 20%,rgba(60,74,112,.7),rgba(12,15,24,.96));
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 20px 40px -30px #000;
+}
+.dossier-portrait svg{width:34px;height:34px;opacity:.8}
+.dossier-name{font-size:20px;font-weight:600;letter-spacing:.12em;color:#f2f5fb;line-height:1.3}
+.dossier-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.tag{
+  font-family:var(--sans);font-size:9.5px;letter-spacing:.18em;padding:3px 8px;border-radius:4px;
+  border:1px solid var(--line-hi);color:var(--text-dim);background:rgba(255,255,255,.02);
+}
+.tag.accent{color:var(--accent-lit);border-color:var(--accent-30);background:var(--accent-8)}
+.field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:8px}
+.field{
+  background:linear-gradient(160deg,rgba(20,25,39,.8),rgba(9,12,20,.9));
+  border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+  transition:border-color .24s var(--ease);
+}
+.field:hover{border-color:var(--line-hi)}
+.field dt{font-family:var(--sans);font-size:9.5px;letter-spacing:.24em;color:var(--text-faint-2);text-transform:uppercase;margin-bottom:6px}
+.field dd{font-size:13px;color:var(--text);letter-spacing:.05em;line-height:1.7}
+.field dd.is-blank{color:#454d5e;font-family:var(--sans);font-size:12px;letter-spacing:.14em}
+.note-block{padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.22)}
+.note-block h4{font-family:var(--sans);font-size:9.5px;letter-spacing:.24em;color:var(--text-faint-2);text-transform:uppercase;margin-bottom:9px;font-weight:400}
+.note-block p{font-size:12.5px;line-height:2;color:var(--text-dim)}
+
+/* 物品网格 */
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px;align-content:start}
+.item-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);width:100%;min-height:0}
+.item-layout > .split-main:last-child{border-left:1px solid var(--line);background:rgba(0,0,0,.14)}
+.item-card{
+  position:relative;display:flex;flex-direction:column;text-align:left;padding:13px 14px 14px;border-radius:12px;
+  border:1px solid var(--line);background:linear-gradient(160deg,rgba(26,32,50,.6),rgba(12,15,24,.8));
+  transition:.26s var(--ease);overflow:hidden;
+}
+.item-card:hover{transform:translateY(-3px);border-color:var(--accent-30);box-shadow:0 18px 34px -26px #000}
+.item-card.is-on{border-color:var(--accent-30);background:linear-gradient(160deg,rgba(36,44,68,.7),rgba(14,18,28,.9))}
+.item-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.item-glyph{width:26px;height:26px;color:var(--text-dim);opacity:.8}
+.item-card.is-on .item-glyph,.item-card:hover .item-glyph{color:var(--accent-lit);opacity:1}
+.item-count{font-family:var(--mono);font-size:11px;color:var(--text-faint-2);font-variant-numeric:tabular-nums}
+.item-name{display:block;font-size:13.5px;font-weight:600;letter-spacing:.06em;color:var(--text);line-height:1.5}
+.item-kind{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:.2em;color:var(--text-faint-2);margin-top:5px}
+
+/* 守则 */
+.ink-legend{display:flex;gap:16px;flex-wrap:wrap;padding:12px 22px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.2);align-items:center}
+.ink-item{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:11px;letter-spacing:.14em;color:var(--text-dim);transition:opacity .3s var(--ease)}
+.ink-swatch{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.ink-item.is-hidden{opacity:.32}
+.ink-item.is-hidden .ink-swatch{box-shadow:none}
+.ink-item .veil{font-size:9px;letter-spacing:.2em;color:var(--text-faint-2)}
+.rule-group{margin-bottom:26px}
+.rule-group:last-child{margin-bottom:0}
+.rule-group-head{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.rule-group-head h3{font-size:13px;font-weight:600;letter-spacing:.16em;color:#e4e9f4}
+.rule-group-head span{flex:1;height:1px;background:linear-gradient(90deg,var(--line-hi),transparent)}
+.rule-group-head em{font-family:var(--mono);font-style:normal;font-size:10px;color:var(--text-faint-2);letter-spacing:.1em}
+.rule{
+  position:relative;display:flex;gap:14px;padding:13px 15px;border-radius:10px;
+  border:1px solid var(--line);margin-bottom:7px;
+  background:rgba(13,16,26,.62);transition:.24s var(--ease);
+}
+.rule:hover{border-color:var(--line-hi);background:rgba(20,25,39,.8)}
+.rule-no{
+  font-family:var(--mono);font-size:10.5px;color:var(--text-faint-2);flex:0 0 26px;
+  font-variant-numeric:tabular-nums;padding-top:3px;letter-spacing:.02em;
+}
+.rule-text{font-size:13.5px;line-height:1.95;letter-spacing:.04em;flex:1;color:#c6cddd}
+.rule.ink-ink .rule-text{color:#d2d8e5}
+.rule.ink-cinnabar .rule-text{color:#d8614a}
+.rule.ink-indigo .rule-text{color:#7593e0}
+.rule.ink-mixed .rule-text{color:#c6cddd}
+.rule.ink-mixed .rule-text .half-cin{color:#d8614a}
+.rule.ink-mixed .rule-text .half-indi{color:#7593e0}
+.rule.is-veiled{overflow:hidden}
+.rule.is-veiled .rule-text{
+  color:transparent!important;text-shadow:0 0 9px rgba(140,155,190,.55);
+  -webkit-user-select:none;
+          user-select:none;position:relative;
+}
+.rule.is-veiled::after{
+  content:"";position:absolute;inset:0;border-radius:10px;
+  background:linear-gradient(105deg,transparent 20%,rgba(90,105,140,.07) 46%,transparent 74%);
+}
+.rule-veil-note{
+  flex:0 0 auto;align-self:center;font-family:var(--sans);font-size:9px;
+  letter-spacing:.2em;color:#3f4757;padding:2px 7px;border:1px solid var(--line);border-radius:4px;
+}
+
+/* 疑点 */
+.doubt{
+  position:relative;padding:15px 17px 15px 22px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(13,16,26,.6);margin-bottom:9px;
+  transition:.24s var(--ease);
+}
+.doubt:hover{border-color:var(--line-hi);transform:translateX(2px)}
+.doubt::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:2px;border-radius:2px;background:var(--accent);opacity:.55}
+.doubt h3{font-size:13.5px;font-weight:600;letter-spacing:.08em;color:#e4e9f4;margin-bottom:7px}
+.doubt p{font-size:12.5px;line-height:1.95;color:var(--text-dim)}
+.doubt-meta{display:flex;gap:14px;margin-top:10px;font-family:var(--sans);font-size:9.5px;letter-spacing:.18em;color:var(--text-faint-2)}
+.doubt-meta span{display:flex;align-items:center;gap:5px}
+.doubt-meta svg{width:10px;height:10px;opacity:.7}
+
+/* 日志 */
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:linear-gradient(180deg,var(--accent-30),var(--line),transparent)}
+.log-item{position:relative;padding:0 0 20px}
+.log-item:last-child{padding-bottom:0}
+.log-item::before{
+  content:"";position:absolute;left:-21px;top:6px;width:7px;height:7px;border-radius:50%;
+  background:var(--ink-800);border:1px solid var(--accent-50);
+}
+.log-time{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--accent-lit);font-variant-numeric:tabular-nums}
+.log-text{font-size:13px;line-height:1.85;color:var(--text-dim);margin-top:4px}
+
+/* 设置 */
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:15px 0;border-bottom:1px solid var(--line);
+}
+.setting-row:last-child{border-bottom:0}
+.setting-label{font-size:13px;letter-spacing:.08em;color:var(--text)}
+.setting-desc{font-family:var(--sans);font-size:11px;color:var(--text-faint-2);margin-top:4px;letter-spacing:.06em;line-height:1.7}
+.seg{display:flex;gap:3px;padding:3px;border-radius:8px;background:rgba(0,0,0,.36);border:1px solid var(--line);flex:0 0 auto}
+.seg button{padding:5px 11px;border-radius:6px;font-family:var(--sans);font-size:11px;letter-spacing:.12em;color:var(--text-faint-2);transition:.2s var(--ease)}
+.seg button:hover{color:var(--text)}
+.seg button.is-on{color:#fff;background:var(--accent-14);box-shadow:0 0 0 1px var(--accent-30) inset}
+
+/* 响应式 */
+@media (max-width:1180px){
+  .brand-sub{display:none}
+  .shell{grid-template-columns:236px minmax(0,1fr)}
+  .navbtn{padding:9px 10px;font-size:12px;letter-spacing:.08em}
+}
+@media (max-width:1040px){
+  .navbtn span{display:none}
+  .navbtn{padding:9px 11px}
+  .navbtn.is-active::after{left:11px;right:11px}
+}
+@media (max-width:1000px){
+  .split{grid-template-columns:1fr}
+  .split-rail{border-right:0;border-bottom:1px solid var(--line);max-height:190px}
+  .item-layout{grid-template-columns:minmax(0,1fr)}
+  .item-layout > .split-main:last-child{border-left:0;border-top:1px solid var(--line)}
+}
+@media (max-width:860px){
+  body{overflow:auto;overflow-x:hidden}
+  .topbar{flex-wrap:wrap;gap:10px;padding:11px 14px}
+  .brand{order:1}
+  .hud{order:2;margin-left:auto;padding-left:0;border-left:0;gap:8px}
+  .hud-time{font-size:17px}
+  .navbar{
+    order:3;width:100%;margin-left:0;gap:2px;
+    overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;
+    scrollbar-width:none;-ms-overflow-style:none;
+    padding-bottom:2px;border-top:1px solid var(--line);padding-top:8px;
+  }
+  .navbar::-webkit-scrollbar{display:none}
+  .navbtn{flex:0 0 auto;padding:8px 11px}
+  .navbtn.is-active::after{left:11px;right:11px;bottom:3px}
+  .shell{
+    grid-template-columns:minmax(0,1fr);height:auto;
+    padding:12px;
+    gap:12px;
+  }
+  .rail{flex-direction:column;overflow:visible;padding-right:0;gap:10px}
+  .rail .panel{flex:none;width:100%}
+  .stage{min-height:0;padding:14px 13px 12px;border-radius:16px}
+  .feed{overflow:visible;max-height:none;mask-image:none;-webkit-mask-image:none}
+  .feed-inner{gap:18px}
+  .msg-body{font-size:15px;line-height:1.95}
+  .choice-grid{grid-template-columns:1fr}
+  .stage-title{font-size:18px}
+  .broadcast{display:none}
+  .modal-layer{padding:8px}
+  .modal-shell{height:min(100%,760px);border-radius:16px}
+  .modal-head{padding:16px 16px 13px}
+  .modal-title{font-size:17px}
+  .modal-foot{padding:10px 16px;font-size:9.5px;letter-spacing:.12em}
+  .split{grid-template-columns:minmax(0,1fr)}
+  .split-rail{border-right:0;border-bottom:1px solid var(--line);max-height:180px}
+  .split-main{padding:14px 16px}
+  .item-layout{grid-template-columns:minmax(0,1fr)}
+  .item-layout > .split-main:last-child{border-left:0;border-top:1px solid var(--line)}
+  .filter-bar{padding:10px 16px;flex-wrap:wrap;gap:5px}
+  .ink-legend{padding:10px 16px;gap:12px}
+  .field-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .item-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .composer-foot{flex-direction:column;gap:4px}
+}
+/* 窄宽度（酒馆移动端/窄消息界面）：整卡改为文档流，由内容撑高 */
+@media (max-width:720px){
+  .shell{
+    grid-template-columns:minmax(0,1fr);
+    height:auto;
+    padding:10px;
+    gap:10px;
+  }
+  .rail{flex-direction:row;flex-wrap:wrap;overflow:visible;padding-right:0;gap:8px}
+  .rail .panel{flex:1 1 220px;min-width:0}
+  .stage{min-height:0;padding:12px 11px 10px;border-radius:14px}
+  .feed{overflow:visible;max-height:none;mask-image:none;-webkit-mask-image:none}
+  .msg-body{font-size:15px;line-height:1.95}
+  .choice-grid{grid-template-columns:1fr}
+  .stage-title{font-size:17px}
+  .broadcast{display:none}
+  .modal-layer{padding:6px;align-items:stretch}
+  .modal-shell{height:100%;max-height:none;border-radius:14px}
+  .modal-head,.modal-foot{padding-left:14px;padding-right:14px}
+  .split,.item-layout{grid-template-columns:minmax(0,1fr)}
+  .split-rail{border-right:0;border-bottom:1px solid var(--line);max-height:170px}
+  .split-main{padding:13px 14px}
+  .item-layout > .split-main:last-child{border-left:0;border-top:1px solid var(--line)}
+  .item-grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}
+  .composer-foot{flex-direction:column;gap:4px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+.motion-lite .atmos-glow{animation:none}
+.motion-lite .void-ring .spin,
+.motion-lite .bcast-wave i,
+.motion-lite .dot.bad{animation:none}
+.motion-lite .atmos-scan{opacity:.08}
+.motion-lite .msg{animation:none}
+
+
+/*# sourceMappingURL=main.css.map*/</style></head><body><div id="vault" data-cognition="passenger"><div class="atmos" aria-hidden="true"><div class="atmos-glow"></div><div class="atmos-grid"></div><div class="atmos-noise"></div><div class="atmos-scan"></div></div><header class="topbar"><div class="brand"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="14.5" stroke="currentColor" stroke-width="1.4" stroke-dasharray="78 13" stroke-linecap="round" opacity=".9"/><circle cx="20" cy="20" r="8.5" stroke="currentColor" stroke-width=".8" opacity=".35"/><circle cx="20" cy="20" r="2.4" fill="currentColor"/><path d="M20 5.5V9M20 31v3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".7"/></svg><div class="brand-text"><h1 class="brand-title">末班守则<span class="brand-sep">·</span>环线</h1><p class="brand-sub">Mingde Loop · Last Train</p></div></div><nav class="navbar" aria-label="界面导航"><button class="navbtn is-active" id="nav-narrative" type="button" aria-current="page"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5.5h14M3 10h9M3 14.5h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> <span>叙事</span></button> <button class="navbtn" id="nav-members" type="button" data-modal="modal-members"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8" cy="7" r="2.8" stroke="currentColor" stroke-width="1.3"/><path d="M2.8 16.4c.5-2.9 2.6-4.4 5.2-4.4s4.7 1.5 5.2 4.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M14 6.6a2.2 2.2 0 1 1 1.6 3.7M16.4 16.4c-.2-1.6-.8-2.9-1.9-3.7" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".6"/></svg> <span>成员</span></button> <button class="navbtn" id="nav-items" type="button" data-modal="modal-items"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.6 17 6.4v7.2L10 17.4 3 13.6V6.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M3 6.4 10 10l7-3.6M10 10v7.4" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" opacity=".6"/></svg> <span>物品</span></button> <button class="navbtn" id="nav-rules" type="button" data-modal="modal-rules"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="4" y="2.8" width="12" height="14.4" rx="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M7 6.6h6M7 9.6h6M7 12.6h3.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> <span>守则</span></button> <button class="navbtn" id="nav-doubts" type="button" data-modal="modal-doubts"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="5.4" stroke="currentColor" stroke-width="1.3"/><path d="M13.2 13.2 17 17" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> <span>疑点</span></button> <button class="navbtn" id="nav-log" type="button" data-modal="modal-log"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7.2" stroke="currentColor" stroke-width="1.3"/><path d="M10 5.8V10l3 1.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>日志</span></button></nav><div class="hud"><div class="hud-clock"><span class="hud-time" id="hud-time">23:47</span> <span class="hud-station" id="hud-station">长乐路</span></div><button class="iconbtn" id="btn-settings" type="button" aria-label="打开设置" data-modal="modal-settings"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="2.6" stroke="currentColor" stroke-width="1.3"/><path d="M10 2.6v2M10 15.4v2M17.4 10h-2M4.6 10h-2M15.2 4.8l-1.4 1.4M6.2 13.8l-1.4 1.4M15.2 15.2l-1.4-1.4M6.2 6.2 4.8 4.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></div></header><div class="shell"><aside class="rail" aria-label="状态侧栏"><section class="panel" aria-labelledby="panel-cog-title"><h2 class="panel-eyebrow" id="panel-cog-title">认知状态</h2><div class="cog-switch" role="group" aria-labelledby="panel-cog-title"><button class="cog-btn is-on" type="button" data-cog="passenger" aria-pressed="true">乘客</button> <button class="cog-btn" type="button" data-cog="crew" aria-pressed="false">乘务</button> <button class="cog-btn" type="button" data-cog="switcher" aria-pressed="false">换乘者</button></div><p class="cog-hint" id="cog-hint">你只能读到朱砂色的字。靛青的部分在你眼里是空白的。</p></section><section class="panel" aria-labelledby="panel-vitals-title"><h2 class="panel-eyebrow" id="panel-vitals-title">体征</h2><div class="vital"><div class="vital-head"><span class="vital-name">体力</span> <span class="vital-num"><span id="vital-hp">100</span><small>/100</small></span></div><div class="bar" role="progressbar" aria-labelledby="vital-hp" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="bar-hp"><div class="bar-fill" id="fill-hp" style="width:100%"></div></div></div><div class="vital"><div class="vital-head"><span class="vital-name">理智</span> <span class="vital-num"><span id="vital-san">80</span><small>/100</small></span></div><div class="bar" role="progressbar" aria-labelledby="vital-san" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" id="bar-san"><div class="bar-fill is-san" id="fill-san" style="width:80%"></div></div></div></section><section class="panel" aria-labelledby="panel-marks-title"><h2 class="panel-eyebrow" id="panel-marks-title">标记</h2><dl class="marks"><div class="mark"><dt>违规次数</dt><dd><span id="mark-violations">0</span></dd></div><div class="mark"><dt>已被锁定</dt><dd><span class="dot" id="dot-locked"></span><span id="mark-locked">否</span></dd></div><div class="mark"><dt>持票根</dt><dd><span class="dot" id="dot-ticket"></span><span id="mark-ticket">否</span></dd></div><div class="mark"><dt>它所在位置</dt><dd><span id="mark-it">站务室</span></dd></div></dl><button class="rail-link" type="button" data-modal="modal-doubts"><span>已知疑点</span><span id="rail-doubt-count">0 / 5</span></button> <button class="rail-link" type="button" data-modal="modal-rules"><span>已抄录守则</span><span id="rail-rule-count">0</span></button></section></aside><main class="stage"><span class="stage-corner tl" aria-hidden="true"></span> <span class="stage-corner tr" aria-hidden="true"></span> <span class="stage-corner bl" aria-hidden="true"></span> <span class="stage-corner br" aria-hidden="true"></span><section class="stage-head" aria-labelledby="stage-title"><div><p class="stage-eyebrow">当前位置 <b id="stage-station">长乐路 · B2 站台</b></p><h2 class="stage-title" id="stage-title">末班车 <em>没有</em> 回到终点站</h2></div><div class="broadcast" aria-hidden="true"><div class="bcast-wave"><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="bcast-label" id="bcast-label">广播 · 90s</span></div></section><section class="feed" id="narrative-feed" aria-label="叙事正文" aria-live="polite"><div class="feed-inner" id="feed-inner"><div class="void-state" id="feed-void"><svg class="void-ring" viewBox="0 0 132 132" fill="none" aria-hidden="true"><g class="spin"><circle cx="66" cy="66" r="52" stroke="currentColor" stroke-width="1" stroke-dasharray="3 7" opacity=".45"/><circle cx="66" cy="66" r="40" stroke="currentColor" stroke-width=".8" stroke-dasharray="120 12 26 10" opacity=".7"/><circle cx="66" cy="14" r="2.2" fill="currentColor"/><circle cx="66" cy="118" r="1.6" fill="currentColor" opacity=".6"/></g><circle cx="66" cy="66" r="5.4" stroke="currentColor" stroke-width="1" opacity=".8"/><circle cx="66" cy="66" r="1.6" fill="currentColor"/></svg><h3 class="void-title">叙事尚未开始。<br><b>站台的广播还在等你抬头。</b></h3><p class="void-sub">下面的输入框会把你的动作交给叙事引擎。<br>正文、疑点与四项选项将随剧情填入此页。</p><div class="void-hr"></div><p class="void-sub" style="opacity:.72">尚未接入语言模型 · 页面结构已就位</p></div></div></section><section class="choices" aria-labelledby="choices-title"><div class="choices-head"><span class="choices-title" id="choices-title">选项</span> <span class="choices-meta" id="choices-meta">叙事生成后填入四项</span></div><div class="choice-grid" id="choice-grid"><button class="choice" type="button" id="choice-1" disabled="disabled"><span class="choice-idx">01</span><span class="choice-text">——</span> <svg class="choice-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9M8.4 4.2 12.2 8l-3.8 3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button> <button class="choice" type="button" id="choice-2" disabled="disabled"><span class="choice-idx">02</span><span class="choice-text">——</span> <svg class="choice-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9M8.4 4.2 12.2 8l-3.8 3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button> <button class="choice" type="button" id="choice-3" disabled="disabled"><span class="choice-idx">03</span><span class="choice-text">——</span> <svg class="choice-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9M8.4 4.2 12.2 8l-3.8 3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button> <button class="choice is-skip" type="button" id="choice-4" disabled="disabled"><span class="choice-idx">04</span><span class="choice-text">——</span> <svg class="choice-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9M8.4 4.2 12.2 8l-3.8 3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></section><footer class="composer"><form class="composer-box" id="composer-form" autocomplete="off"><label class="visually-hidden" for="composer-input">输入你的动作</label> <textarea class="composer-input" id="composer-input" rows="1" placeholder="你要做什么……" aria-describedby="composer-hint"></textarea> <button class="send-btn" id="btn-send" type="submit">送出 <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.4 8h10M9 4.4 12.6 8 9 11.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></form><div class="composer-foot"><span id="composer-hint"><span class="state-dot"><i></i>叙事引擎未接入</span></span> <span>回车送出 · Shift + 回车换行</span></div></footer></main></div><div class="modal-layer" id="modal-members" role="dialog" aria-modal="true" aria-labelledby="members-title"><div class="modal-shell"><header class="modal-head"><div><p class="modal-eyebrow">Roster / 同行与接触者</p><h2 class="modal-title" id="members-title">成员档案</h2><p class="modal-desc">在站台、车厢与隧道里遇见过的人。名字是唯一能带走的东西。</p></div><button class="modal-close" type="button" aria-label="关闭成员档案" data-close><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><div class="modal-body"><div class="split"><div class="split-rail" id="member-list" aria-label="成员列表"><div class="empty" id="member-list-empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.2"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M16.6 7.4a2.6 2.6 0 1 1 1.9 4.4" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity=".6"/></svg><p class="empty-title">记录本是空的。<br>你还没有记住任何一张脸。</p><p class="empty-sub">在站台与谁说过话，<br>谁的名字就会写在这里。</p></div></div><div class="split-main" id="member-detail" aria-live="polite"><div class="empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M8 8h8M8 12h8M8 16h4.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"/></svg><p class="empty-title">左侧还没有名单。</p><p class="empty-sub">选中一名成员，<br>姓名、性别、身份与它会显示在这里。</p></div></div></div></div><footer class="modal-foot"><span class="hint"><i></i>成员随剧情写入 · 当前 <span class="js-count" data-count="members">0</span> 人</span> <span>Esc 关闭</span></footer></div></div><div class="modal-layer" id="modal-items" role="dialog" aria-modal="true" aria-labelledby="items-title"><div class="modal-shell"><header class="modal-head"><div><p class="modal-eyebrow">Inventory / 随身物</p><h2 class="modal-title" id="items-title">物品管理</h2><p class="modal-desc">你身上所有的东西。有些是别人塞给你的，你不记得是什么时候。</p></div><button class="modal-close" type="button" aria-label="关闭物品管理" data-close><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><div class="modal-body"><div class="split-wide"><div class="filter-bar" id="item-filters" role="group" aria-label="物品筛选"><button class="chip is-on" type="button" data-item-filter="all">全部<b id="cnt-all">0</b></button> <button class="chip" type="button" data-item-filter="carry">随身<b id="cnt-carry">0</b></button> <button class="chip" type="button" data-item-filter="key">关键<b id="cnt-key">0</b></button> <button class="chip" type="button" data-item-filter="consume">消耗<b id="cnt-consume">0</b></button> <button class="chip" type="button" data-item-filter="clue">线索<b id="cnt-clue">0</b></button></div><div class="item-layout"><div class="split-main" id="item-grid-wrap"><div class="empty" id="item-empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 8.5 12 13l8-4.5M12 13v7" stroke="currentColor" stroke-width="1" stroke-linejoin="round" opacity=".6"/></svg><p class="empty-title">你把外套内袋翻了一遍。<br>除了折痕，什么都没有。</p><p class="empty-sub">拾到、被塞进手里、从柜台下拿走的东西，<br>都会落到这里。</p></div><div class="item-grid" id="item-grid" hidden></div></div><div class="split-main" id="item-detail" aria-live="polite"><div class="empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 4"/></svg><p class="empty-title">未选中物件。</p><p class="empty-sub">选中一件物品，<br>来源、状态与用途会显示在这里。</p></div></div></div></div></div><footer class="modal-foot"><span class="hint"><i></i>随身物随剧情写入 · 当前 <span class="js-count" data-count="items">0</span> 件</span> <span>Esc 关闭</span></footer></div></div><div class="modal-layer" id="modal-rules" role="dialog" aria-modal="true" aria-labelledby="rules-title"><div class="modal-shell"><header class="modal-head"><div><p class="modal-eyebrow">Standing Orders / 你抄下来的字</p><h2 class="modal-title" id="rules-title">已获守则</h2><p class="modal-desc">颜色不是排版。颜色决定了你能不能读到那半句话。</p></div><button class="modal-close" type="button" aria-label="关闭已获守则" data-close><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><div class="ink-legend" id="ink-legend" aria-label="当前可见的墨色"><span class="ink-item" data-ink="ink"><span class="ink-swatch" style="background:#d2d8e5"></span>墨黑<span class="veil" data-veil="ink"></span></span> <span class="ink-item" data-ink="cinnabar"><span class="ink-swatch" style="background:#d8614a;box-shadow:0 0 8px rgba(200,72,47,.7)"></span>朱砂<span class="veil" data-veil="cinnabar"></span></span> <span class="ink-item is-hidden" data-ink="indigo"><span class="ink-swatch" style="background:#7593e0;box-shadow:0 0 8px rgba(91,127,212,.7)"></span>靛青<span class="veil" data-veil="indigo">不可见</span></span></div><div class="modal-body"><div class="split-wide"><div class="filter-bar" id="rule-filters" role="group" aria-label="按来源筛选"><button class="chip is-on" type="button" data-rule-filter="all">全部来源<b id="rcnt-all">0</b></button> <button class="chip" type="button" data-rule-filter="站台守则">站台守则<b>0</b></button> <button class="chip" type="button" data-rule-filter="车厢守则">车厢守则<b>0</b></button> <button class="chip" type="button" data-rule-filter="小卖部">小卖部<b>0</b></button> <button class="chip" type="button" data-rule-filter="站务室">站务室<b>0</b></button> <button class="chip" type="button" data-rule-filter="隧道">隧道<b>0</b></button> <button class="chip" type="button" data-rule-filter="手写便条">手写便条<b>0</b></button> <button class="chip" type="button" data-rule-filter="C出口">C 出口<b>0</b></button></div><div class="split-main" id="rule-list" aria-live="polite"><div class="empty" id="rule-empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"/></svg><p class="empty-title">一条也没有。<br>你读过的守则还留在原地，还没被抄下来。</p><p class="empty-sub">在站台立柱、车厢门内侧、柜台玻璃下读到规则时，<br>它们会按墨色归档到这里。</p><div class="empty-rule"></div><p class="empty-sub" style="opacity:.62">同一条里青朱混排时，你只会读到属于你的那半句。</p></div></div></div></div><footer class="modal-foot"><span class="hint"><i></i>已抄录 <span class="js-count" data-count="rules">0</span> 条 · 认知过滤生效中</span> <span id="rule-foot-cog">当前：乘客</span></footer></div></div><div class="modal-layer" id="modal-doubts" role="dialog" aria-modal="true" aria-labelledby="doubts-title"><div class="modal-shell"><header class="modal-head"><div><p class="modal-eyebrow">Unresolved / 对不上的地方</p><h2 class="modal-title" id="doubts-title">已知疑点</h2><p class="modal-desc">最多记五条。多出来的，会自己把最旧的那条挤掉。</p></div><button class="modal-close" type="button" aria-label="关闭已知疑点" data-close><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><div class="modal-body"><div class="split-rail" style="border-right:0;flex:1" id="doubt-list" aria-live="polite"><div class="empty" id="doubt-empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.6" stroke="currentColor" stroke-width="1.2"/><path d="M15.8 15.8 20 20" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M11 8.2v3.4M11 14.2v.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><p class="empty-title">暂时没有对不上的地方。</p><p class="empty-sub">广播念过陌生的站名、规则少了一行、<br>有人在你不看的时候换了姿势——<br>都会记到这里。</p></div></div></div><footer class="modal-foot"><span class="hint"><i></i><span class="js-count" data-count="doubts">0</span> / 5 条</span> <span>已解释的疑点会被划掉</span></footer></div></div><div class="modal-layer" id="modal-log" role="dialog" aria-modal="true" aria-labelledby="log-title"><div class="modal-shell"><header class="modal-head"><div><p class="modal-eyebrow">Timeline / 这一夜</p><h2 class="modal-title" id="log-title">事件日志</h2><p class="modal-desc">从 23:47 开始记。之后的每一分钟都算数。</p></div><button class="modal-close" type="button" aria-label="关闭事件日志" data-close><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><div class="modal-body"><div class="split-main" style="width:100%" id="log-list" aria-live="polite"><div class="empty" id="log-empty"><svg class="empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.2"/><path d="M12 7.4V12l3.4 2.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><p class="empty-title">这一夜还没留下痕迹。</p><p class="empty-sub">每一次移动、每一次违规、每一次广播，<br>都会落成一条时间。</p></div></div></div><footer class="modal-foot"><span class="hint"><i></i><span class="js-count" data-count="log">0</span> 条记录</span> <span>按时间正序排列</span></footer></div></div><div class="modal-layer" id="modal-settings" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div class="modal-shell" style="width:min(680px,100%);height:auto;max-height:min(760px,100%)"><header class="modal-head"><div><p class="modal-eyebrow">System / 阅读环境</p><h2 class="modal-title" id="settings-title">设置</h2><p class="modal-desc">这里只调阅读，不调命运。</p></div><button class="modal-close" type="button" aria-label="关闭设置" data-close><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><div class="modal-body" style="padding:4px 22px 18px;overflow-y:auto;display:block"><div class="setting-row"><div><p class="setting-label">正文字号</p><p class="setting-desc">叙事流的文字大小</p></div><div class="seg" id="seg-fontsize" role="group" aria-label="正文字号"><button type="button" data-size="s">小</button> <button type="button" data-size="m" class="is-on">中</button> <button type="button" data-size="l">大</button></div></div><div class="setting-row"><div><p class="setting-label">动效强度</p><p class="setting-desc">光晕漂移、扫描线与卡片过渡</p></div><div class="seg" id="seg-motion" role="group" aria-label="动效强度"><button type="button" data-motion="full" class="is-on">完整</button> <button type="button" data-motion="lite">减弱</button></div></div><div class="setting-row"><div><p class="setting-label">认知过滤演示</p><p class="setting-desc">切换侧栏的认知状态，守则页会跟着换墨</p></div><div class="seg" id="seg-demo" role="group" aria-label="认知过滤演示"><button type="button" data-cog-set="passenger" class="is-on">乘客</button> <button type="button" data-cog-set="crew">乘务</button> <button type="button" data-cog-set="switcher">换乘者</button></div></div><div class="setting-row"><div><p class="setting-label">叙事引擎</p><p class="setting-desc">当前为离线框架 · 未连接语言模型</p></div><span style="font-family:var(--sans);font-size:11px;letter-spacing:.18em;color:var(--warn)">待接入</span></div></div><footer class="modal-foot"><span class="hint"><i></i>设置仅作用于本地显示</span> <span>Esc 关闭</span></footer></div></div></div></body>
